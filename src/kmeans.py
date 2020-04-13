@@ -9,7 +9,7 @@ def train(data, k, which_way, l2_norm, converge_limit=4):
     dimensionality = dataset.shape[1]
     distances = np.zeros([n, k], dtype="float64") ## distances to centroids of each cluster
     centroids = np.zeros([k, dimensionality]) ## centroids of each cluster
-    clustering_before = np.full([n], 5) ## hold info about each instance is assigned into which cluster before update, used to check converge
+    clustering_before = np.full([n], 5) ## hold info about each instance is assigned into which cluster before update, used to check convergence
     clustering = np.full([n], 5) ## hold info about each instance is assigned into which cluster
     converge_counter = 0
 
@@ -50,7 +50,7 @@ def train(data, k, which_way, l2_norm, converge_limit=4):
                 mean = np.mean(points,axis=0)
                 centroids[i] = mean
         ##print((np.sum(clustering==0),np.sum(clustering==1),np.sum(clustering==2),np.sum(clustering==3)))
-        ## check converge
+        ## check convergence
         if (clustering == clustering_before).all():
             converge_counter += 1
         clustering_before = deepcopy(clustering)

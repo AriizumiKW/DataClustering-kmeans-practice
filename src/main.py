@@ -7,9 +7,9 @@ def main():
     ###################### configuration ######################
     directories = ["data/animals", "data/countries", "data/fruits", "data/veggies"] ## must be ordered to 1.animals 2.countries 3.fruits 4.veggies
     runs = 20 ## how many times should we run to calculate the average precison/recall/f-score
-    time_wait = 0.1 ## because Python pseudo random number generator is time-dependent
-    if_l2_norm = False ## if use L2-normalise
-    which_way_to_calculate_distance = 2 ## 1: euclidean distance, 2: Manhattan distance, 3: cosine similarity
+    time_wait = 0.1 ## wait a while before next running, because Python pseudo random number generator is time-dependent
+    if_l2_norm = False ## if use L2-normalised feature vectors
+    which_way_to_calculate_distance = 1 ## 1: euclidean distance, 2: Manhattan distance, 3: cosine similarity
     ###########################################################
     dataset_animals = reader.readfile(directories[0])
     dataset_countries = reader.readfile(directories[1])
