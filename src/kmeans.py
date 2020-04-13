@@ -1,16 +1,20 @@
 import numpy as np
 import random
 from copy import deepcopy
+from matplotlib import pyplot as plt
 
-def train(dataset, k, converge_limit=5):
+def train(data, k, which_way, l2_norm, converge_limit=4):
+    dataset = deepcopy(data)
     n = dataset.shape[0]
     dimensionality = dataset.shape[1]
     distances = np.zeros([n, k], dtype="float64") ## distances to centroids of each cluster
     centroids = np.zeros([k, dimensionality]) ## centroids of each cluster
-    clustering_before = np.full([n, 1], 5) ## hold info about each instance is assigned into which cluster before update, used to check converge
-    clustering = np.full([n, 1], 5) ## hold info about each instance is assigned into which cluster
+    clustering_before = np.full([n], 5) ## hold info about each instance is assigned into which cluster before update, used to check converge
+    clustering = np.full([n], 5) ## hold info about each instance is assigned into which cluster
     converge_counter = 0
 
+    if l2_norm:
+        dataset = l2_normalise(dataset)
     ## randomly select K different points as initial centroids
     random_integers = generate_k_different_random_int(k, n)
     for i in range(0, k):
@@ -19,8 +23,15 @@ def train(dataset, k, converge_limit=5):
     ## start iterations
     while True:
         for i, instance in enumerate(dataset):
-            for j, centroid in enumerate(centroids):
-                distances[i, j] = euclidean_distance(instance, centroid)
+            if which_way == 1:
+                for j, centroid in enumerate(centroids):
+                    distances[i, j] = euclidean_distance(instance, centroid)
+            elif which_way == 2:
+                for j, centroid in enumerate(centroids):
+                    distances[i, j] = manhattan_distance(instance, centroid)
+            elif which_way == 3:
+                for j, centroid in enumerate(centroids):
+                    distances[i, j] = cosine_similarity(instance, centroid)
 
             ## find which cluster is the nearest, and join it
             min_distance = distances[i, 0]
@@ -30,19 +41,14 @@ def train(dataset, k, converge_limit=5):
                 if distance < min_distance:
                     min_distance = distance
                     min_distance_cluster_num = j
-            clustering[i, 0] = min_distance_cluster_num
+            clustering[i] = min_distance_cluster_num
 
         ## update centroids
         for i in range(0, k):
-            points = []
-            for j, cluster in enumerate(clustering):
-                if cluster == i:
-                    points.append(dataset[j])
-            sum = np.zeros([1, dimensionality])
-            for point in points:
-                sum = sum + point
-            mean = sum / len(points)
-            centroids[i] = mean
+            points = dataset[clustering == i]
+            if(len(points) != 0):
+                mean = np.mean(points,axis=0)
+                centroids[i] = mean
         ##print((np.sum(clustering==0),np.sum(clustering==1),np.sum(clustering==2),np.sum(clustering==3)))
         ## check converge
         if (clustering == clustering_before).all():
@@ -74,9 +80,34 @@ def test(clustering, labels):
     return (precision, recall, f_score)
 
 
+def draw_plot(ks, precisions, recalls, fscores):
+    plt.figure(figsize=(8, 4), dpi=80)
+    plt.title('Result')
+    plt.plot(ks, precisions, color='green', label='precision')
+    plt.plot(ks, recalls, color ='red', label='recall')
+    plt.plot(ks, fscores, color='blue', label='f-score')
+    plt.xlabel('k')
+    plt.ylabel('P/R/F')
+    plt.legend()
+    plt.show()
+
+
+def l2_normalise(dataset):
+    for i, row in enumerate(dataset):
+        dataset[i] = row / np.linalg.norm(row)
+    return dataset
+
 
 def euclidean_distance(instance, centroid):
     return np.sqrt(np.sum(np.square(instance - centroid)))
+
+
+def manhattan_distance(instance, centroid):
+    return np.sum(np.abs(instance - centroid))
+
+
+def cosine_similarity(instance, centroid):
+    return np.dot(instance, centroid) / (np.linalg.norm(instance) * np.linalg.norm(centroid))
 
 
 def generate_k_different_random_int(k, n):
@@ -85,7 +116,7 @@ def generate_k_different_random_int(k, n):
         while True:
             rand_int = random.randint(0, n-1)
             for integer in random_integers:
-                if integer == rand_int: ## dont allow to generate two same centroids
+                if integer == rand_int: ## dont allow to generate two same integers
                     continue
             random_integers.append(rand_int)
             break

@@ -3,7 +3,7 @@ import re
 
 def readfile(filename):
     data = []
-    with open("data/"+filename) as file:
+    with open(filename) as file:
         for line in file:
             line = line.replace("\n", "") ## remove '\n'
             list_of_str = re.split(' ', line) ## split by space
