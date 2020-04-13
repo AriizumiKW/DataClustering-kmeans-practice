@@ -7,7 +7,7 @@ def main():
     ###################### configuration ######################
     k = 4 ## hypervalue "K"
     runs = 20 ## how many times should we run to calculate the average precison/recall/fscore
-    time_wait = 0.2 ## because Python pseudo random number generator is time-dependent
+    time_wait = 0.1 ## because Python pseudo random number generator is time-dependent
     ###########################################################
     dataset_animals = reader.readfile("animals")
     dataset_countries = reader.readfile("countries")
@@ -19,12 +19,11 @@ def main():
     labels_veggies = np.full([dataset_veggies.shape[0], 1], 4) ## veggies labeled as 4
     dataset = np.vstack([dataset_animals, dataset_countries, dataset_fruits, dataset_veggies])
     labels = np.vstack([labels_animals, labels_countries, labels_fruits, labels_veggies]) ## put them together into one matrix
-    clustering = kmeans.train(dataset, k)
-
     precisions = 0
     recalls = 0
     f_scores = 0
     for i in range (0, runs):
+        clustering = kmeans.train(dataset, k)
         (p, r, f) = kmeans.test(clustering, labels)
         precisions += p
         recalls += r

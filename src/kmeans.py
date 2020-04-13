@@ -41,12 +41,8 @@ def train(dataset, k, converge_limit=5):
             sum = np.zeros([1, dimensionality])
             for point in points:
                 sum = sum + point
-            try:
-                mean = sum / len(points)
-            except Exception:
-                print(len(points))
+            mean = sum / len(points)
             centroids[i] = mean
-        print(k)
         ##print((np.sum(clustering==0),np.sum(clustering==1),np.sum(clustering==2),np.sum(clustering==3)))
         ## check converge
         if (clustering == clustering_before).all():
