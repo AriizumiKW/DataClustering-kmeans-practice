@@ -4,13 +4,14 @@ import reader
 import kmeans
 
 def main():
-    ###################### configuration ######################
+    ##################### configurations ######################
     directories = ["data/animals", "data/countries", "data/fruits", "data/veggies"] ## must be ordered to 1.animals 2.countries 3.fruits 4.veggies
-    runs = 10 ## how many times should we run to calculate the average precison/recall/f-score
+    runs = 20 ## how many times should we run to calculate the average precison/recall/f-score
     time_wait = 0.1 ## wait a while before next running, because Python pseudo random number generator is time-dependent
     if_l2_norm = False ## if use L2-normalised feature vectors
     which_way_to_calculate_distance = 1 ## 1: euclidean distance, 2: Manhattan distance, 3: cosine similarity
-    if_show_result_in_console = True ## if print results in console
+    auto_vary_k_from_1_to_10 = True ## automatically testing by varying k from 1 to 10
+    _k = 4  ## this setting take effect if "auto_vary_k_from_1_to_10" set to False (dont allow to set 0)
     ###########################################################
 
     dataset_animals = reader.readfile(directories[0])
@@ -30,21 +31,28 @@ def main():
     recalls = []
     f_scores = []
     rand_indices = []
-    for k in range(1, 11): ## k = 1 to 11, not including 11
-        ks.append(k)
-        (p, r, f, ri) = run_and_test(k, dataset, labels, runs, time_wait, which_way_to_calculate_distance, if_l2_norm)
+    if auto_vary_k_from_1_to_10:
+        for k in range(1, 11): ## k = 1 to 11, not including 11
+            ks.append(k)
+            (p, r, f, ri) = run_and_test(k, dataset, labels, runs, time_wait, which_way_to_calculate_distance, if_l2_norm)
+            precisions.append(p)
+            recalls.append(r)
+            f_scores.append(f)
+            rand_indices.append(ri)
+        kmeans.draw_plot(ks, precisions, recalls, f_scores, rand_indices)
+    else:
+        ks.append(_k)
+        (p, r, f, ri) = run_and_test(_k, dataset, labels, runs, time_wait, which_way_to_calculate_distance, if_l2_norm)
         precisions.append(p)
         recalls.append(r)
         f_scores.append(f)
         rand_indices.append(ri)
-    kmeans.draw_plot(ks, precisions, recalls, f_scores, rand_indices)
 
     ## print result in console
-    if if_show_result_in_console:
-        print("k\tprecision\trecall\tfscore\trand index")
-        for i in range(0, 10):
-            print(str(ks[i]) +'\t' + str('%.2f' % precisions[i]) +'\t' + str('%.2f' % recalls[i]) +'\t' + str(
-                '{:.2f}'.format(f_scores[i])) +'\t' + str('%.2f' % rand_indices[i]))
+    print("k\tprecision\trecall\tfscore\trand index")
+    for i in range(0, len(ks)):
+        print(str(ks[i]) +'\t' + str('%.2f' % precisions[i]) +'\t' + str('%.2f' % recalls[i]) +'\t' + str(
+            '{:.2f}'.format(f_scores[i])) +'\t' + str('%.2f' % rand_indices[i]))
 
 
 def run_and_test(k, dataset, labels, runs, time_wait, which_way_to_calculate_distance, if_l2_norm):
