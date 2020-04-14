@@ -3,15 +3,17 @@ import random
 from copy import deepcopy
 from matplotlib import pyplot as plt
 
-def train(data, k, which_way, l2_norm, converge_limit=4):
+def train(data, k, which_way, l2_norm, converge_limit=40):
     dataset = deepcopy(data)
     n = dataset.shape[0]
     dimensionality = dataset.shape[1]
     distances = np.zeros([n, k], dtype="float64") ## distances to centroids of each cluster
     centroids = np.zeros([k, dimensionality]) ## centroids of each cluster
+    clustering_twice_before = np.full([n], 5)
     clustering_before = np.full([n], 5) ## hold info about each instance is assigned into which cluster before update, used to check convergence
     clustering = np.full([n], 5) ## hold info about each instance is assigned into which cluster
     converge_counter = 0
+    counter = 0
 
     if l2_norm:
         dataset = l2_normalise(dataset)
@@ -49,12 +51,13 @@ def train(data, k, which_way, l2_norm, converge_limit=4):
             if(len(points) != 0):
                 mean = np.mean(points,axis=0)
                 centroids[i] = mean
-        ##print((np.sum(clustering==0),np.sum(clustering==1),np.sum(clustering==2),np.sum(clustering==3)))
+        counter += 1
         ## check convergence
-        if (clustering == clustering_before).all():
+        if (clustering == clustering_before).all() or (clustering_twice_before == clustering).all():
             converge_counter += 1
+        clustering_twice_before = clustering_before
         clustering_before = deepcopy(clustering)
-        if converge_counter >= converge_limit:
+        if converge_counter >= 4 or counter >= converge_limit:
             return clustering
 
 
@@ -77,17 +80,19 @@ def test(clustering, labels):
     precision = true_positive / (true_positive + false_positive)
     recall = true_positive / (true_positive + false_negative)
     f_score = 2 * precision * recall / (precision + recall)
-    return (precision, recall, f_score)
+    ri = (true_positive + true_negative) / (true_positive + true_negative + false_positive + false_negative)
+    return (precision, recall, f_score, ri)
 
 
-def draw_plot(ks, precisions, recalls, fscores):
-    plt.figure(figsize=(8, 4), dpi=80)
-    plt.title('Result')
+def draw_plot(ks, precisions, recalls, fscores, rand_indices):
+    plt.figure(figsize=(8, 4), dpi=160)
     plt.plot(ks, precisions, color='green', label='precision')
-    plt.plot(ks, recalls, color ='red', label='recall')
-    plt.plot(ks, fscores, color='blue', label='f-score')
+    plt.plot(ks, recalls, color ='blue', label='recall')
+    plt.plot(ks, fscores, color='red', label='f-score')
+    plt.plot(ks, rand_indices, color='olive', label='rand index')
     plt.xlabel('k')
-    plt.ylabel('P/R/F')
+    plt.ylabel('P/R/F/RI')
+    plt.xticks(range(1,11,1))
     plt.legend()
     plt.show()
 
