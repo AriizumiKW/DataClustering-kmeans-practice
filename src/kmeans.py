@@ -3,14 +3,16 @@ import random
 from copy import deepcopy
 from matplotlib import pyplot as plt
 
-def train(data, k, which_way, l2_norm, converge_limit=40):
+
+def train(data, k, which_way, l2_norm, converge_limit=30):
     dataset = deepcopy(data)
     n = dataset.shape[0]
     dimensionality = dataset.shape[1]
-    distances = np.zeros([n, k], dtype="float64") ## distances to centroids of each cluster
-    centroids = np.zeros([k, dimensionality]) ## centroids of each cluster
-    clustering_before = np.full([n], 5) ## hold info about each instance is assigned into which cluster before update, used to check convergence
-    clustering = np.full([n], 5) ## hold info about each instance is assigned into which cluster
+    distances = np.zeros([n, k], dtype="float64")  ## distances to centroids of each cluster
+    centroids = np.zeros([k, dimensionality])  ## centroids of each cluster
+    clustering_before = np.full([n],
+                                5)  ## hold info about each instance is assigned into which cluster before update, used to check convergence
+    clustering = np.full([n], 5)  ## hold info about each instance is assigned into which cluster
     converge_counter = 0
     counter = 0
 
@@ -47,15 +49,15 @@ def train(data, k, which_way, l2_norm, converge_limit=40):
         ## update centroids
         for i in range(0, k):
             points = dataset[clustering == i]
-            if(len(points) != 0):
-                mean = np.mean(points,axis=0)
+            if (len(points) != 0):
+                mean = np.mean(points, axis=0)
                 centroids[i] = mean
         counter += 1
         ## check convergence
         if (clustering == clustering_before).all():
             converge_counter += 1
         clustering_before = deepcopy(clustering)
-        if converge_counter >= 4 or counter >= converge_limit:
+        if converge_counter >= 4 or counter >= converge_limit: ## force to converge if iterations >= converge_limit
             return clustering
 
 
@@ -66,14 +68,14 @@ def test(clustering, labels):
     false_negative = 0
     n = len(clustering)
     for i in range(0, n):
-        for j in range(i+1, n): # find each pair
-            if(clustering[i] == clustering[j] and labels[i] == labels[j]):
+        for j in range(i + 1, n):  # find each pair
+            if (clustering[i] == clustering[j] and labels[i] == labels[j]):
                 true_positive += 1
-            elif(clustering[i] != clustering[j] and labels[i] != labels[j]):
+            elif (clustering[i] != clustering[j] and labels[i] != labels[j]):
                 true_negative += 1
-            elif(clustering[i] == clustering[j] and labels[i] != labels[j]):
+            elif (clustering[i] == clustering[j] and labels[i] != labels[j]):
                 false_positive += 1
-            elif(clustering[i] != clustering[j] and labels[i] == labels[j]):
+            elif (clustering[i] != clustering[j] and labels[i] == labels[j]):
                 false_negative += 1
     precision = true_positive / (true_positive + false_positive)
     recall = true_positive / (true_positive + false_negative)
@@ -85,12 +87,12 @@ def test(clustering, labels):
 def draw_plot(ks, precisions, recalls, fscores, rand_indices):
     plt.figure(figsize=(8, 4), dpi=160)
     plt.plot(ks, precisions, color='green', label='precision')
-    plt.plot(ks, recalls, color ='blue', label='recall')
+    plt.plot(ks, recalls, color='blue', label='recall')
     plt.plot(ks, fscores, color='red', label='f-score')
     plt.plot(ks, rand_indices, color='olive', label='rand index')
     plt.xlabel('k')
     plt.ylabel('P/R/F/RI')
-    plt.xticks(range(1,11,1))
+    plt.xticks(range(1, 11, 1))
     plt.legend()
     plt.show()
 
@@ -117,9 +119,9 @@ def generate_k_different_random_int(k, n):
     random_integers = []
     for i in range(0, k):
         while True:
-            rand_int = random.randint(0, n-1)
+            rand_int = random.randint(0, n - 1)
             for integer in random_integers:
-                if integer == rand_int: ## dont allow to generate two same integers
+                if integer == rand_int:  ## dont allow to generate two same integers
                     continue
             random_integers.append(rand_int)
             break

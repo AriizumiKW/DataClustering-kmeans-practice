@@ -41,7 +41,7 @@ def main():
 
     ## print result in console
     if if_show_result_in_console:
-        print("k\tprecision\trecall\tf-score\trand index")
+        print("k\tprecision\trecall\tfscore\trand index")
         for i in range(0, 10):
             print(str(ks[i]) +'\t' + str('%.2f' % precisions[i]) +'\t' + str('%.2f' % recalls[i]) +'\t' + str(
                 '{:.2f}'.format(f_scores[i])) +'\t' + str('%.2f' % rand_indices[i]))
